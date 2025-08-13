@@ -453,6 +453,41 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- VR to 2D Section -->
+                    <div id="section-vr2d" class="border border-slate-200 dark:border-slate-700 rounded-lg">
+                        <div id="vr2d-toggle" class="section-toggle flex justify-between items-center p-4 cursor-pointer">
+                            <h3 class="font-semibold text-slate-800 dark:text-slate-200">VR (360°) to 2D</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                        <div class="section-content hidden p-4 border-t border-slate-200 dark:border-slate-700 space-y-4">
+                            <div class="flex items-center mb-2">
+                                <input id="enable-vr2d" type="checkbox" class="h-4 w-4 text-indigo-600 rounded">
+                                <label for="enable-vr2d" class="ml-2 block text-sm text-slate-600 dark:text-slate-300">Enable VR to 2D conversion</label>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                                <div>
+                                    <label for="vr2d-fov" class="block text-xs font-medium text-slate-700 dark:text-slate-300">FOV (deg)</label>
+                                    <input type="number" id="vr2d-fov" min="10" max="180" value="90" class="mt-1 block w-full px-2 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-slate-900 dark:text-slate-200 text-xs">
+                                </div>
+                                <div>
+                                    <label for="vr2d-yaw" class="block text-xs font-medium text-slate-700 dark:text-slate-300">Yaw (deg)</label>
+                                    <input type="number" id="vr2d-yaw" min="-180" max="180" value="0" class="mt-1 block w-full px-2 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-slate-900 dark:text-slate-200 text-xs">
+                                </div>
+                                <div>
+                                    <label for="vr2d-pitch" class="block text-xs font-medium text-slate-700 dark:text-slate-300">Pitch (deg)</label>
+                                    <input type="number" id="vr2d-pitch" min="-90" max="90" value="0" class="mt-1 block w-full px-2 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-slate-900 dark:text-slate-200 text-xs">
+                                </div>
+                                <div>
+                                    <label for="vr2d-roll" class="block text-xs font-medium text-slate-700 dark:text-slate-300">Roll (deg)</label>
+                                    <input type="number" id="vr2d-roll" min="-180" max="180" value="0" class="mt-1 block w-full px-2 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-slate-900 dark:text-slate-200 text-xs">
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">Extract a 2D perspective from a 360° equirectangular video using FFmpeg's v360 filter.</p>
+                        </div>
+                    </div>
 
                     <!-- Audio Options -->
                     <div id="section-audio" class="border border-slate-200 dark:border-slate-700 rounded-lg">
@@ -657,6 +692,12 @@
             const moonIcon = document.getElementById('moon-icon');
             const allSections = document.querySelectorAll('#accordion-container > div');
             const browseInputBtn = document.getElementById('browse-input-file-btn');
+            // VR to 2D controls
+            const enableVR2D = document.getElementById('enable-vr2d');
+            const vr2dFov = document.getElementById('vr2d-fov');
+            const vr2dYaw = document.getElementById('vr2d-yaw');
+            const vr2dPitch = document.getElementById('vr2d-pitch');
+            const vr2dRoll = document.getElementById('vr2d-roll');
 
             // Create a hidden file input for browsing
             const hiddenFilePicker = document.createElement('input');
@@ -709,6 +750,14 @@
 
                 // Video Filters (-vf)
                 let videoFilters = [];
+                // VR to 2D filter
+                if (enableVR2D && enableVR2D.checked) {
+                    const fov = parseFloat(vr2dFov.value) || 90;
+                    const yaw = parseFloat(vr2dYaw.value) || 0;
+                    const pitch = parseFloat(vr2dPitch.value) || 0;
+                    const roll = parseFloat(vr2dRoll.value) || 0;
+                    videoFilters.push(`v360=input=equirect:output=rectilinear:fov=${fov}:yaw=${yaw}:pitch=${pitch}:roll=${roll}`);
+                }
                 if (inputs.resizeWidth.value && inputs.resizeHeight.value) videoFilters.push(`scale=${inputs.resizeWidth.value}:${inputs.resizeHeight.value}`);
                 if (inputs.cropValues.value) videoFilters.push(`crop=${inputs.cropValues.value}`);
                 if (inputs.rotation.value) videoFilters.push(inputs.rotation.value);
@@ -784,6 +833,10 @@
                 command += ` "${o}"`;
                 outputCommand.value = command;
             }
+            // VR to 2D: update command on change
+            [enableVR2D, vr2dFov, vr2dYaw, vr2dPitch, vr2dRoll].forEach(el => {
+                if (el) el.addEventListener('input', generateCommand);
+            });
 
             // --- Event Listeners ---
             Object.values(inputs).forEach(input => {
