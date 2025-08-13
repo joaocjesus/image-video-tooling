@@ -140,12 +140,91 @@
                         </div>
                     </div>
                 </div>
-                <!-- Use GPU Section -->
+                <!-- Settings Section -->
                 <div class="p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
                     <h3 class="font-semibold text-slate-800 dark:text-slate-200 mb-3">Settings</h3>
-                    <div class="flex items-center mt-2">
-                        <input id="use-gpu-cuda" type="checkbox" checked class="h-4 w-4 text-indigo-600 rounded">
-                        <label for="use-gpu-cuda" class="ml-2 block text-sm text-slate-600 dark:text-slate-300">Use GPU (cuda)</label>
+                    <div class="mt-2">
+                        <label for="hwaccel" class="text-sm font-medium text-slate-700 dark:text-slate-300 inline-flex items-center">
+                            Hardware Acceleration
+                            <span class="tooltip ml-2">
+                                <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
+                                <span class="tooltiptext">Optionally use the GPU for decoding: CUDA or NVDEC. This adds -hwaccel <mode>. Encoder options (NVENC) are separate.</span>
+                            </span>
+                        </label>
+                        <select id="hwaccel" class="mt-1 block w-48 px-2 py-1 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-200">
+                            <option value="">None</option>
+                            <option value="cuda">CUDA</option>
+                            <option value="nvdec">NVDEC</option>
+                        </select>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex items-center mb-2">
+                            <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300">NVENC (NVIDIA) Encoding</h4>
+                            <span class="tooltip ml-2">
+                                <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
+                                <span class="tooltiptext">These options apply when using h264_nvenc or hevc_nvenc video codecs.</span>
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label for="nv-preset" class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300">Preset
+                                    <span class="tooltip ml-2">
+                                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
+                                        <span class="tooltiptext">-preset p1–p7. p7 = slowest/best quality, p1 = fastest. 4080-class GPUs can handle p7.</span>
+                                    </span>
+                                </label>
+                                <select id="nv-preset" class="mt-1 block w-full px-2 py-1 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-200">
+                                    <option value="p7">p7 (Best quality)</option>
+                                    <option value="p6">p6</option>
+                                    <option value="p5">p5</option>
+                                    <option value="p4">p4</option>
+                                    <option value="p3">p3</option>
+                                    <option value="p2">p2</option>
+                                    <option value="p1">p1 (Fastest)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="nv-rc" class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300">Rate Control
+                                    <span class="tooltip ml-2">
+                                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
+                                        <span class="tooltiptext">-rc:v vbr/cbr. vbr = variable bitrate (better quality/size), cbr = constant bitrate.</span>
+                                    </span>
+                                </label>
+                                <select id="nv-rc" class="mt-1 block w-full px-2 py-1 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-200">
+                                    <option value="vbr">vbr (Variable)</option>
+                                    <option value="cbr">cbr (Constant)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="nv-cq" class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300">CQ (Quality)
+                                    <span class="tooltip ml-2">
+                                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
+                                        <span class="tooltiptext">-cq:v value. Constant quality. Lower is better. 19–23 is a good range; 0 is lossless (large files).</span>
+                                    </span>
+                                </label>
+                                <input type="number" id="nv-cq" min="0" max="51" value="19" class="mt-1 block w-full px-2 py-1 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-200">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                            <div class="flex items-center">
+                                <input id="nv-bv0" type="checkbox" class="h-4 w-4 text-indigo-600 rounded" checked>
+                                <label for="nv-bv0" class="ml-2 block text-sm text-slate-600 dark:text-slate-300">Set -b:v 0
+                                    <span class="tooltip ml-1">
+                                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
+                                        <span class="tooltiptext">-b:v 0 lets CQ control bitrate (recommended for NVENC CQ mode).</span>
+                                    </span>
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="nv-copy-audio" type="checkbox" class="h-4 w-4 text-indigo-600 rounded" checked>
+                                <label for="nv-copy-audio" class="ml-2 block text-sm text-slate-600 dark:text-slate-300">Copy audio (-c:a copy)
+                                    <span class="tooltip ml-1">
+                                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
+                                        <span class="tooltiptext">-c:a copy keeps original audio without re-encoding when you don't need changes.</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <!-- Accordion Sections -->
@@ -168,11 +247,7 @@
                                         class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300">Video
                                         Codec
                                         <span class="tooltip ml-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
                                             <span class="tooltiptext">-c:v flag. Choose the video encoder. 'Copy' will
                                                 stream copy the video without re-encoding, which is very fast but
                                                 doesn't allow applying filters.</span>
@@ -182,6 +257,8 @@
                                         class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-md text-slate-900 dark:text-slate-200">
                                         <option value="libx264">H.264 (libx264)</option>
                                         <option value="libx265">H.265 (libx265)</option>
+                                        <option value="h264_nvenc">H.264 (NVENC)</option>
+                                        <option value="hevc_nvenc">H.265/HEVC (NVENC)</option>
                                         <option value="copy">Copy (No Re-encoding)</option>
                                     </select>
                                 </div>
@@ -191,11 +268,7 @@
                                         (CRF) <span id="quality-value"
                                             class="ml-2 font-mono text-indigo-600 dark:text-indigo-400">23</span>
                                         <span class="tooltip ml-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
                                             <span class="tooltiptext">-crf flag. Constant Rate Factor. Lower values mean
                                                 higher quality and larger file size. 18 is visually lossless, 23 is a
                                                 good default, 28 is lower quality.</span>
@@ -226,11 +299,7 @@
                                         class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300">Resize
                                         Width
                                         <span class="tooltip ml-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
                                             <span class="tooltiptext">-vf scale=W:H. Set width. Use -1 to maintain
                                                 aspect ratio based on height.</span>
                                         </span>
@@ -243,11 +312,7 @@
                                         class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300">Resize
                                         Height
                                         <span class="tooltip ml-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
                                             <span class="tooltiptext">-vf scale=W:H. Set height. Use -1 to maintain
                                                 aspect ratio based on width.</span>
                                         </span>
@@ -262,11 +327,7 @@
                                         class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300">Crop
                                         (W:H:X:Y)
                                         <span class="tooltip ml-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
                                             <span class="tooltiptext">-vf crop=W:H:X:Y. Crop a section of the video.
                                                 W=width, H=height, X=x-offset, Y=y-offset.</span>
                                         </span>
@@ -295,11 +356,7 @@
                                     <label for="rotation"
                                         class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300">Rotation
                                         <span class="tooltip ml-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
                                             <span class="tooltiptext">-vf rotate. Rotates the video. Note: 90 degrees
                                                 clockwise requires transpose=1.</span>
                                         </span>
@@ -338,11 +395,7 @@
                                     <label for="speed"
                                         class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300">Speed
                                         <span class="tooltip ml-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
                                             <span class="tooltiptext">-vf setpts=PTS/... Changes video speed. < 1.0 is
                                                     faster,> 1.0 is slower. Example: 0.5 for 2x speed, 2.0 for half
                                                     speed.</span>
@@ -356,11 +409,7 @@
                                         class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300">Frame
                                         Rate (FPS)
                                         <span class="tooltip ml-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
                                             <span class="tooltiptext">-r flag. Set a specific frame rate for the output
                                                 video.</span>
                                         </span>
@@ -428,11 +477,7 @@
                                         class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300">Start
                                         Time
                                         <span class="tooltip ml-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
                                             <span class="tooltiptext">-ss flag. Set the start time. Format: HH:MM:SS or
                                                 just seconds (e.g., 90).</span>
                                         </span>
@@ -445,11 +490,7 @@
                                         class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300">End
                                         Time
                                         <span class="tooltip ml-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
                                             <span class="tooltiptext">-to flag. Set the end time. Format: HH:MM:SS or
                                                 just seconds.</span>
                                         </span>
@@ -520,11 +561,7 @@
                                     <span id="volume-value"
                                         class="ml-2 font-mono text-indigo-600 dark:text-indigo-400">100</span>%
                                     <span class="tooltip ml-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
                                         <span class="tooltiptext">-af volume=... Adjusts audio volume. 1.0 is original,
                                             0.5 is half, 2.0 is double.</span>
                                     </span>
@@ -537,11 +574,7 @@
                                     class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300">Replace
                                     Audio File
                                     <span class="tooltip ml-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
                                         <span class="tooltiptext">Adds a second -i input and maps the video from the
                                             first and audio from the second.</span>
                                     </span>
@@ -574,11 +607,7 @@
                                     class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300">Watermark
                                     Image File
                                     <span class="tooltip ml-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
                                         <span class="tooltiptext">Adds a second -i input for the watermark image and
                                             uses the overlay filter.</span>
                                     </span>
@@ -604,11 +633,7 @@
                                     class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300">Burn-in
                                     Subtitle File
                                     <span class="tooltip ml-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-400 text-white text-[10px] font-bold">?</span>
                                         <span class="tooltiptext">-vf subtitles=... Permanently adds subtitles to the
                                             video frames.</span>
                                     </span>
@@ -685,7 +710,12 @@
                 watermarkPosition: document.getElementById('watermark-position'),
                 subtitleFile: document.getElementById('subtitle-file'),
                 createGif: document.getElementById('create-gif'),
-                useGpuCuda: document.getElementById('use-gpu-cuda'),
+                hwaccel: document.getElementById('hwaccel'),
+                nvPreset: document.getElementById('nv-preset'),
+                nvRC: document.getElementById('nv-rc'),
+                nvCQ: document.getElementById('nv-cq'),
+                nvBV0: document.getElementById('nv-bv0'),
+                nvCopyAudio: document.getElementById('nv-copy-audio'),
             };
             const outputCommand = document.getElementById('output-command');
             const copyBtn = document.getElementById('copy-btn');
@@ -733,8 +763,8 @@
 
                 // Start building the command
                 let command = 'ffmpeg';
-                if (inputs.useGpuCuda && inputs.useGpuCuda.checked) {
-                    command += ' -hwaccel cuda';
+                if (inputs.hwaccel && inputs.hwaccel.value) {
+                    command += ` -hwaccel ${inputs.hwaccel.value}`;
                 }
 
                 // Handle Extract Audio and Create GIF overrides
@@ -742,8 +772,8 @@
                     o = o.replace(/\.[^/.]+$/, "") + ".mp3";
                     inputs.outputFile.value = o;
                     let cmd = 'ffmpeg';
-                    if (inputs.useGpuCuda && inputs.useGpuCuda.checked) {
-                        cmd += ' -hwaccel cuda';
+                    if (inputs.hwaccel && inputs.hwaccel.value) {
+                        cmd += ` -hwaccel ${inputs.hwaccel.value}`;
                     }
                     cmd += ` -i "${i}" -vn -c:a mp3 -b:a 192k "${o}"`;
                     outputCommand.value = cmd;
@@ -754,8 +784,8 @@
                     o = o.replace(/\.[^/.]+$/, "") + ".gif";
                     inputs.outputFile.value = o;
                     let cmd = 'ffmpeg';
-                    if (inputs.useGpuCuda && inputs.useGpuCuda.checked) {
-                        cmd += ' -hwaccel cuda';
+                    if (inputs.hwaccel && inputs.hwaccel.value) {
+                        cmd += ` -hwaccel ${inputs.hwaccel.value}`;
                     }
                     cmd += ` -i "${i}" -vf "fps=10,scale=500:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -loop 0 "${o}"`;
                     outputCommand.value = cmd;
@@ -768,6 +798,14 @@
                 }
                 if (inputs.watermarkFile.value) {
                     command += ` -i "${inputs.watermarkFile.value}"`;
+                }
+                const hasReplaceAudio = !!inputs.replaceAudioFile.value;
+                const hasWatermark = !!inputs.watermarkFile.value;
+                let usedComplex = false;
+                // Watermark input index depends on whether replace-audio is present
+                let watermarkInputIndex = -1;
+                if (hasWatermark) {
+                    watermarkInputIndex = hasReplaceAudio ? 2 : 1;
                 }
 
                 // Video Filters (-vf)
@@ -806,10 +844,12 @@
                 }
 
                 let complexFilter = '';
-                if (inputs.watermarkFile.value) {
-                    const baseVideoFilters = videoFilters.filter(f => !f.startsWith('overlay')).join(',');
-                    complexFilter = `[0:v]${baseVideoFilters ? baseVideoFilters + ',' : ''}split[base][text];[text]overlay=${inputs.watermarkPosition.value}[out]`;
-                    command += ` -filter_complex "${complexFilter}" -map "[out]"`;
+                if (hasWatermark) {
+                    // Build a proper overlay chain using the watermark input index
+                    const baseChain = videoFilters.length > 0 ? `${videoFilters.join(',')},` : '';
+                    complexFilter = `[0:v]${baseChain}format=rgba[base];[${watermarkInputIndex}:v]format=rgba[wm];[base][wm]overlay=${inputs.watermarkPosition.value}[vout]`;
+                    command += ` -filter_complex "${complexFilter}" -map "[vout]"`;
+                    usedComplex = true;
                 } else if (videoFilters.length > 0) {
                     command += ` -vf "${videoFilters.join(',')}"`;
                 }
@@ -825,22 +865,48 @@
 
                 // Video Codec
                 const codec = inputs.videoCodec.value;
+                const isNvenc = codec === 'h264_nvenc' || codec === 'hevc_nvenc';
                 if (codec === 'copy') {
                     command += ' -c:v copy';
+                } else if (isNvenc) {
+                    command += ` -c:v ${codec}`;
+                    command += ` -preset ${inputs.nvPreset?.value || 'p7'}`;
+                    command += ` -rc:v ${inputs.nvRC?.value || 'vbr'}`;
+                    command += ` -cq:v ${inputs.nvCQ?.value || 19}`;
+                    if (inputs.nvBV0?.checked) command += ' -b:v 0';
                 } else {
                     command += ` -c:v ${codec}`;
                     command += ` -crf ${inputs.videoQuality.value}`;
                     command += ` -preset medium`;
                 }
 
-                // Audio
+                // Audio: prioritize replace-audio, then filters, then copy/encode defaults
                 if (inputs.removeAudio.checked) {
                     command += ' -an';
                 } else if (inputs.replaceAudioFile.value) {
+                    // Map video and external audio properly
+                    if (usedComplex) {
+                        command += ' -map 1:a:0';
+                    } else {
+                        command += ' -map 0:v:0 -map 1:a:0';
+                    }
                     command += ' -c:a aac -b:a 192k';
-                    command += ' -map 0:v:0 -map 1:a:0';
-                }
-                else {
+                } else if (audioFilters.length > 0) {
+                    // When audio filters are used, we must re-encode audio
+                    if (usedComplex) {
+                        command += ' -map 0:a?';
+                    }
+                    command += ' -c:a aac -b:a 128k';
+                } else if (isNvenc && inputs.nvCopyAudio?.checked) {
+                    // Copy audio only when no audio filters are active
+                    if (usedComplex) {
+                        command += ' -map 0:a?';
+                    }
+                    command += ' -c:a copy';
+                } else {
+                    if (usedComplex) {
+                        command += ' -map 0:a?';
+                    }
                     command += ' -c:a aac -b:a 128k';
                 }
 
@@ -866,6 +932,8 @@
                     input.addEventListener('input', generateCommand);
                 }
             });
+            // hwaccel select should trigger on change
+            if (inputs.hwaccel) inputs.hwaccel.addEventListener('change', generateCommand);
             // Drag & Drop handlers for Input File
             ['dragenter', 'dragover'].forEach(evt => {
                 inputs.inputFile.addEventListener(evt, (e) => {
@@ -906,10 +974,32 @@
             });
             inputs.videoCodec.addEventListener('change', () => {
                 const qualitySlider = document.getElementById('video-quality');
-                qualitySlider.disabled = inputs.videoCodec.value === 'copy';
+                const isNvenc = ['h264_nvenc', 'hevc_nvenc'].includes(inputs.videoCodec.value);
+                qualitySlider.disabled = inputs.videoCodec.value === 'copy' || isNvenc;
                 qualitySlider.parentElement.classList.toggle('opacity-50', qualitySlider.disabled);
                 generateCommand();
             });
+            // Ensure NVENC settings apply: if user tweaks NVENC controls while a CPU codec is selected,
+            // automatically switch to h264_nvenc and regenerate the command.
+            function handleNvencControlChange() {
+                const codec = inputs.videoCodec.value;
+                const isNvenc = codec === 'h264_nvenc' || codec === 'hevc_nvenc';
+                if (!isNvenc) {
+                    inputs.videoCodec.value = 'h264_nvenc';
+                    // Trigger the codec change handler to update CRF state and regenerate
+                    inputs.videoCodec.dispatchEvent(new Event('change'));
+                } else {
+                    generateCommand();
+                }
+            }
+            if (inputs.nvPreset) inputs.nvPreset.addEventListener('change', handleNvencControlChange);
+            if (inputs.nvRC) inputs.nvRC.addEventListener('change', handleNvencControlChange);
+            if (inputs.nvCQ) {
+                inputs.nvCQ.addEventListener('input', handleNvencControlChange);
+                inputs.nvCQ.addEventListener('change', handleNvencControlChange);
+            }
+            if (inputs.nvBV0) inputs.nvBV0.addEventListener('change', handleNvencControlChange);
+            if (inputs.nvCopyAudio) inputs.nvCopyAudio.addEventListener('change', handleNvencControlChange);
             inputs.videoQuality.addEventListener('input', () => {
                 qualityValue.textContent = inputs.videoQuality.value;
             });
