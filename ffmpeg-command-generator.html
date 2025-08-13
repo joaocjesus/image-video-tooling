@@ -117,27 +117,26 @@
                 <div class="p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
                     <h3 class="font-semibold text-slate-800 dark:text-slate-200 mb-3">Input & Output</h3>
                     <div class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label for="input-file"
-                                    class="block text-sm font-medium text-slate-700 dark:text-slate-300">Input
-                                    File</label>
-                                <div class="mt-1 flex gap-2">
-                                    <input type="text" id="input-file" value="input.mov"
-                                        class="flex-1 px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm text-slate-900 dark:text-slate-200 drop-target"
-                                        placeholder="Drop a file here or click Browse">
-                                    <button id="browse-input-file-btn"
-                                        class="px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600">Browse</button>
-                                </div>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Tip: Drag & drop a file onto the input, or click Browse.</p>
+                        <div>
+                            <label for="input-file"
+                                class="block text-sm font-medium text-slate-700 dark:text-slate-300">Input
+                                File</label>
+                            <div class="mt-1 flex gap-2 flex-nowrap items-stretch">
+                                <input type="text" id="input-file" value="input.mov"
+                                    class="min-w-0 flex-auto px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-l-md shadow-sm text-slate-900 dark:text-slate-200 drop-target"
+                                    placeholder="Drop a file here or click Browse" style="border-top-right-radius:0;border-bottom-right-radius:0;">
+                                <button id="browse-input-file-btn"
+                                    class="px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-r-md text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"
+                                    style="border-top-left-radius:0;border-bottom-left-radius:0;">Browse</button>
                             </div>
-                            <div>
-                                <label for="output-file"
-                                    class="block text-sm font-medium text-slate-700 dark:text-slate-300">Output
-                                    File</label>
-                                <input type="text" id="output-file" value="output.mp4"
-                                    class="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm text-slate-900 dark:text-slate-200">
-                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Tip: Drag & drop a file onto the input, or click Browse.</p>
+                        </div>
+                        <div class="mt-4">
+                            <label for="output-file"
+                                class="block text-sm font-medium text-slate-700 dark:text-slate-300">Output
+                                File</label>
+                            <input type="text" id="output-file" value="output.mp4"
+                                class="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm text-slate-900 dark:text-slate-200">
                         </div>
                     </div>
                 </div>
