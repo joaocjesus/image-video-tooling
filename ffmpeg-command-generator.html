@@ -140,7 +140,14 @@
                         </div>
                     </div>
                 </div>
-
+                <!-- Use GPU Section -->
+                <div class="p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
+                    <h3 class="font-semibold text-slate-800 dark:text-slate-200 mb-3">Settings</h3>
+                    <div class="flex items-center mt-2">
+                        <input id="use-gpu-cuda" type="checkbox" checked class="h-4 w-4 text-indigo-600 rounded">
+                        <label for="use-gpu-cuda" class="ml-2 block text-sm text-slate-600 dark:text-slate-300">Use GPU (cuda)</label>
+                    </div>
+                </div>
                 <!-- Accordion Sections -->
                 <div id="accordion-container" class="space-y-2">
                     <!-- Video Codec & Quality -->
@@ -678,6 +685,7 @@
                 watermarkPosition: document.getElementById('watermark-position'),
                 subtitleFile: document.getElementById('subtitle-file'),
                 createGif: document.getElementById('create-gif'),
+                useGpuCuda: document.getElementById('use-gpu-cuda'),
             };
             const outputCommand = document.getElementById('output-command');
             const copyBtn = document.getElementById('copy-btn');
@@ -723,24 +731,38 @@
                 const i = inputs.inputFile.value || 'input.mov';
                 let o = inputs.outputFile.value || 'output.mp4';
 
+                // Start building the command
+                let command = 'ffmpeg';
+                if (inputs.useGpuCuda && inputs.useGpuCuda.checked) {
+                    command += ' -hwaccel cuda';
+                }
+
                 // Handle Extract Audio and Create GIF overrides
                 if (inputs.extractAudio.checked) {
                     o = o.replace(/\.[^/.]+$/, "") + ".mp3";
                     inputs.outputFile.value = o;
-                    let command = `ffmpeg -i "${i}" -vn -c:a mp3 -b:a 192k "${o}"`;
-                    outputCommand.value = command;
+                    let cmd = 'ffmpeg';
+                    if (inputs.useGpuCuda && inputs.useGpuCuda.checked) {
+                        cmd += ' -hwaccel cuda';
+                    }
+                    cmd += ` -i "${i}" -vn -c:a mp3 -b:a 192k "${o}"`;
+                    outputCommand.value = cmd;
                     return;
                 }
 
                 if (inputs.createGif.checked) {
                     o = o.replace(/\.[^/.]+$/, "") + ".gif";
                     inputs.outputFile.value = o;
-                    let command = `ffmpeg -i "${i}" -vf "fps=10,scale=500:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -loop 0 "${o}"`;
-                    outputCommand.value = command;
+                    let cmd = 'ffmpeg';
+                    if (inputs.useGpuCuda && inputs.useGpuCuda.checked) {
+                        cmd += ' -hwaccel cuda';
+                    }
+                    cmd += ` -i "${i}" -vf "fps=10,scale=500:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -loop 0 "${o}"`;
+                    outputCommand.value = cmd;
                     return;
                 }
 
-                let command = `ffmpeg -i "${i}"`;
+                command += ` -i "${i}"`;
                 if (inputs.replaceAudioFile.value) {
                     command += ` -i "${inputs.replaceAudioFile.value}"`;
                 }
