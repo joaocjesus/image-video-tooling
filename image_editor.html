@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Editor</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Configure Tailwind for dark mode
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .custom-file-upload {
+            border: 2px dashed #cbd5e1;
+            display: inline-block;
+            padding: 1rem 2rem;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+
+        .custom-file-upload:hover {
+            background-color: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        .dark .custom-file-upload {
+            border-color: #475569;
+        }
+
+        .dark .custom-file-upload:hover {
+            background-color: #1e293b;
+            border-color: #64748b;
+        }
+
+        .control-btn,
+        .preset-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            background-color: #f1f5f9;
+            color: #475569;
+            transition: background-color 0.2s, color 0.2s;
+            font-size: 0.75rem;
+        }
+
+        .control-btn:hover,
+        .preset-btn:hover {
+            background-color: #e2e8f0;
+        }
+
+        .dark .control-btn,
+        .dark .preset-btn {
+            background-color: #334155;
+            color: #94a3b8;
+        }
+
+        .dark .control-btn:hover,
+        .dark .preset-btn:hover {
+            background-color: #475569;
+        }
+
+        .ai-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loader {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #FFF;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .section-toggle>svg {
+            transition: transform 0.2s ease-in-out;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-slate-100 dark:bg-slate-900 flex items-center justify-center min-h-screen p-4 transition-colors duration-300">
+
+    <div class="w-full max-w-5xl bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 md:p-8">
+        <div class="header mb-6 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100">AI Image Editor</h1>
+                <p class="text-slate-500 dark:text-slate-400 mt-1">Upload, edit, and enhance with AI.</p>
+            </div>
+            <!-- Dark Mode Toggle -->
+            <button id="dark-mode-toggle"
+                class="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-slate-800">
+                <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Main Application Area -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Left Column: Controls -->
+            <div class="space-y-6">
+                <!-- Step 1: Image Upload -->
+                <div>
+                    <label for="file-upload" class="custom-file-upload w-full">
+                        <svg class="mx-auto h-12 w-12 text-slate-400 dark:text-slate-500" stroke="currentColor"
+                            fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                            <path
+                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <span class="mt-2 block text-sm font-semibold text-slate-600 dark:text-slate-300">Click to
+                            upload an image</span>
+                        <span id="file-name" class="mt-1 block text-xs text-slate-500 dark:text-slate-400">PNG, JPG,
+                            WEBP up to 10MB</span>
+                    </label>
+                    <input id="file-upload" name="file-upload" type="file" accept="image/png, image/jpeg, image/webp">
+                </div>
+
+                <!-- Controls Area -->
+                <div id="controls-container" class="hidden space-y-4">
+                    <!-- Image Size Section -->
+                    <div class="p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
+                        <div id="image-size-toggle"
+                            class="section-toggle flex justify-between items-center cursor-pointer">
+                            <h3 class="font-semibold text-slate-800 dark:text-slate-200">Image Size</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                        <div id="image-size-content" class="section-content hidden mt-3 space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                                <div class="space-y-1">
+                                    <label for="width-input" id="width-label"
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300">Width
+                                        (px)</label>
+                                    <input type="number" id="width-input" placeholder="e.g., 1920"
+                                        class="block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm text-slate-900 dark:text-slate-200">
+                                    <div id="width-presets" class="flex gap-2 pt-1">
+                                        <button class="preset-btn" data-size="720">720</button>
+                                        <button class="preset-btn" data-size="1024">1024</button>
+                                        <button class="preset-btn" data-size="1280">1280</button>
+                                    </div>
+                                </div>
+                                <div id="height-group" class="space-y-1">
+                                    <label for="height-input"
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300">Height
+                                        (px)</label>
+                                    <input type="number" id="height-input" placeholder="e.g., 1080"
+                                        class="block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm text-slate-900 dark:text-slate-200">
+                                    <div id="height-presets" class="flex gap-2 pt-1">
+                                        <button class="preset-btn" data-size="720">720</button>
+                                        <button class="preset-btn" data-size="1024">1024</button>
+                                        <button class="preset-btn" data-size="1280">1280</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex items-center">
+                                        <input id="aspect-ratio-lock" type="checkbox"
+                                            class="h-4 w-4 text-indigo-600 rounded">
+                                        <label for="aspect-ratio-lock"
+                                            class="ml-2 block text-sm text-slate-600 dark:text-slate-300">Lock aspect
+                                            ratio</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input id="square-lock" type="checkbox" class="h-4 w-4 text-indigo-600 rounded">
+                                        <label for="square-lock"
+                                            class="ml-2 block text-sm text-slate-600 dark:text-slate-300">Square</label>
+                                    </div>
+                                </div>
+                                <button id="revert-size-btn"
+                                    class="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline">Revert
+                                    to original</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image Effects Section -->
+                    <div class="p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
+                        <div id="image-effects-toggle"
+                            class="section-toggle flex justify-between items-center cursor-pointer">
+                            <h3 class="font-semibold text-slate-800 dark:text-slate-200">Image Effects</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                        <div id="image-effects-content" class="section-content hidden mt-3 space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="filter-select"
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300">Filter</label>
+                                    <select id="filter-select"
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-md text-slate-900 dark:text-slate-200">
+                                        <option value="none">None</option>
+                                        <option value="grayscale">Grayscale</option>
+                                        <option value="sepia">Sepia</option>
+                                        <option value="invert">Invert</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300">Transform</label>
+                                    <div class="mt-1 grid grid-cols-4 gap-2">
+                                        <button id="rotate-left-btn" class="control-btn" title="Rotate Left"><svg
+                                                xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 016 6v3" />
+                                            </svg></button>
+                                        <button id="rotate-right-btn" class="control-btn" title="Rotate Right"><svg
+                                                xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M15 15l6-6m0 0l-6-6m6 6H9a6 6 0 00-6 6v3" />
+                                            </svg></button>
+                                        <button id="flip-h-btn" class="control-btn" title="Flip Horizontal"><svg
+                                                xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                            </svg></button>
+                                        <button id="flip-v-btn" class="control-btn" title="Flip Vertical"><svg
+                                                xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M7 16V4m0 12l-4-4m4 4l4-4m-4-4L7 4m0 0l-4 4m4-4l4 4" />
+                                            </svg></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expand Canvas Section -->
+                    <div class="p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
+                        <div id="expand-canvas-toggle"
+                            class="section-toggle flex justify-between items-center cursor-pointer">
+                            <h3 class="font-semibold text-slate-800 dark:text-slate-200">Expand Canvas</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                        <div id="expand-canvas-content" class="section-content hidden mt-3 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <label for="expand-direction"
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300">Expansion
+                                        Direction</label>
+                                    <select id="expand-direction"
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-md text-slate-900 dark:text-slate-200">
+                                        <option value="both">Both</option>
+                                        <option value="horizontal">Horizontal</option>
+                                        <option value="vertical">Vertical</option>
+                                    </select>
+                                </div>
+                                <button id="revert-canvas-size-btn"
+                                    class="mt-6 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline">Revert
+                                    to image size</button>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                                <div id="expand-width-group" class="space-y-1">
+                                    <label for="expand-width-input"
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300">Canvas
+                                        Width (px)</label>
+                                    <input type="number" id="expand-width-input"
+                                        class="block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-slate-900 dark:text-slate-200">
+                                    <div id="expand-width-presets" class="flex gap-2 pt-1"></div>
+                                </div>
+                                <div id="expand-height-group" class="space-y-1">
+                                    <label for="expand-height-input"
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300">Canvas
+                                        Height (px)</label>
+                                    <input type="number" id="expand-height-input"
+                                        class="block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-slate-900 dark:text-slate-200">
+                                    <div id="expand-height-presets" class="flex gap-2 pt-1"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="expand-color-select"
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300">Background
+                                        Color</label>
+                                    <select id="expand-color-select"
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-md text-slate-900 dark:text-slate-200">
+                                        <option value="#FFFFFF">White</option>
+                                        <option value="#000000">Black</option>
+                                        <option value="#E5E7EB">Light Grey</option>
+                                        <option value="#9CA3AF">Mid Grey</option>
+                                        <option value="#4B5563">Dark Grey</option>
+                                        <option value="#EF4444">Red</option>
+                                        <option value="#22C55E">Green</option>
+                                        <option value="#3B82F6">Blue</option>
+                                        <option value="#F59E0B">Yellow</option>
+                                        <option value="#06B6D4">Cyan</option>
+                                        <option value="#D946EF">Magenta</option>
+                                        <option value="#F97316">Orange</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="expand-position-select"
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300">Image
+                                        Position</label>
+                                    <select id="expand-position-select"
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-md text-slate-900 dark:text-slate-200"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Assistant Section -->
+                    <div class="p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
+                        <div id="ai-assistant-toggle"
+                            class="section-toggle flex justify-between items-center cursor-pointer">
+                            <h3 class="font-semibold text-slate-800 dark:text-slate-200">✨ AI Assistant</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                        <div id="ai-assistant-content" class="section-content hidden mt-3 space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <button id="alt-text-btn"
+                                    class="ai-btn w-full bg-sky-500 text-white font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-sky-600">
+                                    <span class="loader hidden mr-2"></span>
+                                    Generate Alt Text
+                                </button>
+                                <button id="caption-btn"
+                                    class="ai-btn w-full bg-purple-500 text-white font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-purple-600">
+                                    <span class="loader hidden mr-2"></span>
+                                    Suggest Caption
+                                </button>
+                            </div>
+                            <textarea id="ai-result"
+                                class="hidden w-full h-24 p-2 text-sm bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-slate-900 dark:text-slate-200"
+                                placeholder="AI results will appear here..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Format and Download -->
+                    <div class="p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
+                        <h3 class="font-semibold text-slate-800 dark:text-slate-200 mb-3">Save & Download</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-2">
+                                <div class="flex-grow">
+                                    <label for="file-name-input"
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300">File
+                                        Name</label>
+                                    <input type="text" id="file-name-input"
+                                        class="mt-1 block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm text-slate-900 dark:text-slate-200">
+                                </div>
+                                <div class="mt-6 flex items-center">
+                                    <input type="checkbox" id="file-name-lock" class="h-4 w-4 text-indigo-600 rounded">
+                                    <label for="file-name-lock"
+                                        class="ml-2 block text-sm text-slate-600 dark:text-slate-300">Lock</label>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                                <div>
+                                    <label for="format-select"
+                                        class="block text-sm font-medium text-slate-700 dark:text-slate-300">Save
+                                        as</label>
+                                    <select id="format-select"
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-md text-slate-900 dark:text-slate-200">
+                                        <option value="image/png">PNG</option>
+                                        <option value="image/jpeg">JPEG</option>
+                                        <option value="image/webp">WEBP</option>
+                                    </select>
+                                </div>
+                                <button id="download-btn"
+                                    class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-indigo-700">
+                                    Apply & Download
+                                </button>
+                            </div>
+                            <div id="jpeg-quality-container" class="hidden pt-2">
+                                <label for="jpeg-quality"
+                                    class="block text-sm font-medium text-slate-700 dark:text-slate-300">JPEG Quality:
+                                    <span id="jpeg-quality-value">90</span>%</label>
+                                <input id="jpeg-quality" type="range" min="1" max="100" value="90"
+                                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 mt-1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Image Preview -->
+            <div class="md:sticky md:top-8">
+                <div id="image-preview-container"
+                    class="w-full h-full p-4 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-900/50 flex items-center justify-center min-h-[300px]">
+                    <div id="image-placeholder" class="text-center text-slate-500">
+                        <svg class="mx-auto h-16 w-16 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        </svg>
+                        <p class="mt-2 text-sm font-semibold">Image Preview</p>
+                        <p class="text-xs">Your uploaded image will appear here</p>
+                    </div>
+                    <img id="image-preview" src="#" alt="Image Preview"
+                        class="hidden max-w-full max-h-[70vh] rounded-md shadow-sm" />
+                </div>
+            </div>
+        </div>
+
+        <canvas id="canvas" class="hidden"></canvas>
+        <canvas id="preview-canvas" class="hidden"></canvas>
+        <a id="download-link" class="hidden"></a>
+    </div>
+
+    <!-- Custom Message Modal -->
+    <div id="message-modal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+            <p id="modal-message" class="text-slate-800 dark:text-slate-200 mb-4"></p>
+            <button id="modal-close-btn"
+                class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700">OK</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM element references ---
+            const fileInput = document.getElementById('file-upload'), fileNameDisplay = document.getElementById('file-name');
+            const imagePreviewContainer = document.getElementById('image-preview-container'), imagePreview = document.getElementById('image-preview'), imagePlaceholder = document.getElementById('image-placeholder');
+            const controlsContainer = document.getElementById('controls-container');
+            const widthInput = document.getElementById('width-input'), heightInput = document.getElementById('height-input');
+            const widthLabel = document.getElementById('width-label'), heightGroup = document.getElementById('height-group');
+            const aspectRatioLock = document.getElementById('aspect-ratio-lock'), squareLock = document.getElementById('square-lock');
+            const revertSizeBtn = document.getElementById('revert-size-btn');
+            const formatSelect = document.getElementById('format-select'), downloadBtn = document.getElementById('download-btn');
+            const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
+            const previewCanvas = document.getElementById('preview-canvas'), previewCtx = previewCanvas.getContext('2d');
+            const downloadLink = document.getElementById('download-link');
+            const darkModeToggle = document.getElementById('dark-mode-toggle'), sunIcon = document.getElementById('sun-icon'), moonIcon = document.getElementById('moon-icon');
+            const messageModal = document.getElementById('message-modal'), modalMessage = document.getElementById('modal-message'), modalCloseBtn = document.getElementById('modal-close-btn');
+            // Effects elements
+            const filterSelect = document.getElementById('filter-select');
+            const rotateLeftBtn = document.getElementById('rotate-left-btn'), rotateRightBtn = document.getElementById('rotate-right-btn');
+            const flipHBtn = document.getElementById('flip-h-btn'), flipVBtn = document.getElementById('flip-v-btn');
+            const jpegQualityContainer = document.getElementById('jpeg-quality-container'), jpegQualityInput = document.getElementById('jpeg-quality'), jpegQualityValue = document.getElementById('jpeg-quality-value');
+            // AI elements
+            const altTextBtn = document.getElementById('alt-text-btn'), captionBtn = document.getElementById('caption-btn');
+            const aiResultTextarea = document.getElementById('ai-result');
+            // Naming element
+            const fileNameInput = document.getElementById('file-name-input'), fileNameLock = document.getElementById('file-name-lock');
+            // Expand Canvas elements
+            const expandDirection = document.getElementById('expand-direction');
+            const expandWidthGroup = document.getElementById('expand-width-group'), expandWidthInput = document.getElementById('expand-width-input'), expandWidthPresets = document.getElementById('expand-width-presets');
+            const expandHeightGroup = document.getElementById('expand-height-group'), expandHeightInput = document.getElementById('expand-height-input'), expandHeightPresets = document.getElementById('expand-height-presets');
+            const expandColorSelect = document.getElementById('expand-color-select'), expandPositionSelect = document.getElementById('expand-position-select');
+            const revertCanvasSizeBtn = document.getElementById('revert-canvas-size-btn');
+            // Accordion elements
+            const sectionToggles = document.querySelectorAll('.section-toggle');
+
+            // --- State Variables ---
+            let originalImage = null, originalAspectRatio = 1, currentImageDataUrl = null, originalFileName = '';
+            let rotation = 0, flipH = false, flipV = false;
+            const ALL_SIZES = [240, 480, 720, 1024, 1280, 1440, 1920, 2560, 3840];
+            const ALL_POSITIONS = {
+                'center': 'Center', 'top-left': 'Top Left', 'top-center': 'Top Center', 'top-right': 'Top Right',
+                'center-left': 'Center Left', 'center-right': 'Center Right', 'bottom-left': 'Bottom Left',
+                'bottom-center': 'Bottom Center', 'bottom-right': 'Bottom Right'
+            };
+
+            // --- Session Storage Keys ---
+            const DARK_MODE_KEY = 'imageEditor-darkMode', ASPECT_RATIO_KEY = 'imageEditor-aspectRatioLock', FORMAT_KEY = 'imageEditor-format', ACTIVE_SECTION_KEY = 'imageEditor-activeSection';
+
+            // --- Initialization ---
+            function applyPreferences() {
+                // Dark Mode
+                const isDarkMode = sessionStorage.getItem(DARK_MODE_KEY) === 'true';
+                if (isDarkMode) {
+                    document.documentElement.classList.add('dark');
+                    sunIcon.classList.add('hidden');
+                    moonIcon.classList.remove('hidden');
+                }
+                // Aspect Ratio
+                aspectRatioLock.checked = sessionStorage.getItem(ASPECT_RATIO_KEY) === 'true';
+                // Format
+                const savedFormat = sessionStorage.getItem(FORMAT_KEY);
+                if (savedFormat) {
+                    formatSelect.value = savedFormat;
+                    toggleJpegQualitySlider();
+                }
+                // Accordion State
+                const activeSectionId = sessionStorage.getItem(ACTIVE_SECTION_KEY);
+                sectionToggles.forEach(toggle => {
+                    const content = toggle.nextElementSibling;
+                    const shouldBeOpen = toggle.id === activeSectionId;
+                    toggleSection(toggle, content, !shouldBeOpen);
+                });
+            }
+            applyPreferences();
+
+            // --- UI Functions ---
+            function showMessage(message) {
+                modalMessage.textContent = message;
+                messageModal.classList.remove('hidden');
+            }
+            function toggleJpegQualitySlider() {
+                jpegQualityContainer.classList.toggle('hidden', formatSelect.value !== 'image/jpeg');
+            }
+            function toggleAILoader(button, show) {
+                const loader = button.querySelector('.loader');
+                loader.classList.toggle('hidden', !show);
+                button.disabled = show;
+            }
+            function updateFileName() {
+                if (fileNameLock.checked || !originalFileName) return;
+                const width = expandWidthInput.value;
+                const height = expandHeightInput.value;
+                fileNameInput.value = `${originalFileName}-edited-${width}x${height}`;
+            }
+            function updateResizeUI() {
+                const isSquare = squareLock.checked;
+                heightGroup.classList.toggle('opacity-50', isSquare);
+                heightInput.disabled = isSquare;
+                widthLabel.textContent = isSquare ? 'Size (px)' : 'Width (px)';
+                if (isSquare) {
+                    heightInput.value = widthInput.value;
+                }
+            }
+            function toggleSection(toggle, content, isCollapsing) {
+                content.classList.toggle('hidden', isCollapsing);
+                toggle.querySelector('svg').style.transform = isCollapsing ? 'rotate(-90deg)' : 'rotate(0deg)';
+            }
+
+            function updateExpandCanvasUI() {
+                if (!originalImage) return;
+                const direction = expandDirection.value;
+                const currentWidth = parseInt(widthInput.value, 10);
+                const currentHeight = parseInt(heightInput.value, 10);
+
+                expandWidthGroup.style.display = (direction === 'both' || direction === 'horizontal') ? 'block' : 'none';
+                expandHeightGroup.style.display = (direction === 'both' || direction === 'vertical') ? 'block' : 'none';
+
+                if (direction === 'horizontal') {
+                    expandHeightInput.value = currentHeight;
+                } else if (direction === 'vertical') {
+                    expandWidthInput.value = currentWidth;
+                }
+
+                // Update presets
+                updateExpansionPresets('width', currentWidth, expandWidthPresets);
+                updateExpansionPresets('height', currentHeight, expandHeightPresets);
+
+                // Update positions
+                updateExpansionPositions(direction);
+
+                drawFinalPreview();
+            }
+
+            function updateExpansionPresets(type, currentSize, container) {
+                container.innerHTML = '';
+                const presets = ALL_SIZES.filter(s => s > currentSize).slice(0, 3);
+                presets.forEach(size => {
+                    const button = document.createElement('button');
+                    button.className = 'preset-btn';
+                    button.textContent = size;
+                    button.dataset.size = size;
+                    button.onclick = () => {
+                        if (type === 'width') {
+                            expandWidthInput.value = size;
+                            expandWidthInput.dispatchEvent(new Event('input'));
+                        } else {
+                            expandHeightInput.value = size;
+                            expandHeightInput.dispatchEvent(new Event('input'));
+                        }
+                    };
+                    container.appendChild(button);
+                });
+            }
+
+            function updateExpansionPositions(direction) {
+                expandPositionSelect.innerHTML = '';
+                let positions = {};
+                if (direction === 'vertical') {
+                    positions = { 'top-center': 'Top', 'center': 'Center', 'bottom-center': 'Bottom' };
+                } else if (direction === 'horizontal') {
+                    positions = { 'center-left': 'Left', 'center': 'Center', 'center-right': 'Right' };
+                } else {
+                    positions = ALL_POSITIONS;
+                }
+
+                for (const [value, text] of Object.entries(positions)) {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = text;
+                    expandPositionSelect.appendChild(option);
+                }
+            }
+
+            // --- Image Analysis ---
+            function getDominantColorType(img) {
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = img.width;
+                tempCanvas.height = img.height;
+                tempCtx.drawImage(img, 0, 0);
+                const imageData = tempCtx.getImageData(0, 0, img.width, img.height);
+                const data = imageData.data;
+                let lightPixels = 0, darkPixels = 0;
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i], g = data[i + 1], b = data[i + 2];
+                    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                    brightness < 128 ? darkPixels++ : lightPixels++;
+                }
+                return lightPixels > darkPixels ? 'light' : 'dark';
+            }
+
+            // --- Core Drawing Functions ---
+            function drawImageWithTransformations() {
+                if (!originalImage) return;
+                const w = parseInt(widthInput.value, 10);
+                const h = parseInt(heightInput.value, 10);
+
+                const isSideways = rotation % 180 !== 0;
+                canvas.width = isSideways ? h : w;
+                canvas.height = isSideways ? w : h;
+
+                ctx.save();
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.rotate(rotation * Math.PI / 180);
+                ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+                // CORRECTED DRAWIMAGE CALL
+                ctx.drawImage(originalImage, -w / 2, -h / 2, w, h);
+                ctx.restore();
+
+                applyFilter();
+                drawFinalPreview();
+            }
+
+            function drawFinalPreview() {
+                if (!originalImage) return;
+
+                const newWidth = parseInt(expandWidthInput.value, 10);
+                const newHeight = parseInt(expandHeightInput.value, 10);
+                if (isNaN(newWidth) || isNaN(newHeight) || newWidth <= 0 || newHeight <= 0) return;
+
+                previewCanvas.width = newWidth;
+                previewCanvas.height = newHeight;
+
+                previewCtx.fillStyle = expandColorSelect.value;
+                previewCtx.fillRect(0, 0, newWidth, newHeight);
+
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const position = expandPositionSelect.value;
+                let x = 0, y = 0;
+
+                // CORRECTED LOGIC HERE
+                if (position.endsWith('left')) x = 0;
+                else if (position.endsWith('right')) x = newWidth - imgWidth;
+                else x = (newWidth - imgWidth) / 2;
+
+                if (position.startsWith('top')) y = 0;
+                else if (position.startsWith('bottom')) y = newHeight - imgHeight;
+                else y = (newHeight - imgHeight) / 2;
+
+                previewCtx.drawImage(canvas, x, y, imgWidth, imgHeight);
+
+                currentImageDataUrl = previewCanvas.toDataURL();
+                imagePreview.src = currentImageDataUrl;
+            }
+
+            function applyFilter() {
+                const filter = filterSelect.value;
+                if (filter === 'none') return;
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i], g = data[i + 1], b = data[i + 2];
+                    if (filter === 'grayscale') {
+                        const avg = (r + g + b) / 3;
+                        data[i] = data[i + 1] = data[i + 2] = avg;
+                    } else if (filter === 'sepia') {
+                        data[i] = Math.min(255, r * 0.393 + g * 0.769 + b * 0.189);
+                        data[i + 1] = Math.min(255, r * 0.349 + g * 0.686 + b * 0.168);
+                        data[i + 2] = Math.min(255, r * 0.272 + g * 0.534 + b * 0.131);
+                    } else if (filter === 'invert') {
+                        data[i] = 255 - r;
+                        data[i + 1] = 255 - g;
+                        data[i + 2] = 255 - b;
+                    }
+                }
+                ctx.putImageData(imageData, 0, 0);
+            }
+
+            // --- Gemini API Call ---
+            async function callGeminiAPI(prompt, imageDataBase64) {
+                const apiKey = ""; // API key will be injected by the environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                const payload = { contents: [{ role: "user", parts: [{ text: prompt }, { inlineData: { mimeType: "image/png", data: imageDataBase64 } }] }] };
+
+                try {
+                    const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                    const result = await response.json();
+                    if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        throw new Error("Invalid response structure from API.");
+                    }
+                } catch (error) {
+                    console.error("Gemini API call failed:", error);
+                    showMessage("Sorry, the AI feature is currently unavailable. Please try again later.");
+                    return null;
+                }
+            }
+
+            // --- Event Listeners ---
+            modalCloseBtn.addEventListener('click', () => messageModal.classList.add('hidden'));
+            darkModeToggle.addEventListener('click', () => {
+                const isDark = document.documentElement.classList.toggle('dark');
+                sessionStorage.setItem(DARK_MODE_KEY, isDark);
+                sunIcon.classList.toggle('hidden', isDark);
+                moonIcon.classList.toggle('hidden', !isDark);
+            });
+
+            sectionToggles.forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    const content = toggle.nextElementSibling;
+                    const isCurrentlyOpen = !content.classList.contains('hidden');
+
+                    // Collapse all sections
+                    sectionToggles.forEach(t => {
+                        toggleSection(t, t.nextElementSibling, true);
+                    });
+
+                    // If the clicked section was closed, open it
+                    if (!isCurrentlyOpen) {
+                        toggleSection(toggle, content, false);
+                        sessionStorage.setItem(ACTIVE_SECTION_KEY, toggle.id);
+                    } else {
+                        sessionStorage.removeItem(ACTIVE_SECTION_KEY);
+                    }
+                });
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (!file.type.startsWith('image/')) {
+                    showMessage('Please select a valid image file (PNG, JPG, WEBP).');
+                    return;
+                }
+                originalFileName = file.name.split('.').slice(0, -1).join('.');
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    originalImage = new Image();
+                    originalImage.onload = () => {
+                        originalAspectRatio = originalImage.width / originalImage.height;
+                        widthInput.value = originalImage.width;
+                        heightInput.value = originalImage.height;
+                        expandWidthInput.value = originalImage.width;
+                        expandHeightInput.value = originalImage.height;
+                        rotation = 0;
+                        flipH = false;
+                        flipV = false;
+                        filterSelect.value = 'none';
+                        expandColorSelect.value = getDominantColorType(originalImage) === 'light' ? '#FFFFFF' : '#000000';
+                        expandDirection.value = 'both';
+                        fileNameLock.checked = false;
+                        imagePlaceholder.classList.add('hidden');
+                        imagePreview.classList.remove('hidden');
+                        controlsContainer.classList.remove('hidden');
+                        fileNameDisplay.textContent = file.name;
+                        aiResultTextarea.classList.add('hidden');
+                        aiResultTextarea.value = '';
+                        updateExpandCanvasUI();
+                        drawImageWithTransformations();
+                        updateFileName();
+                    };
+                    originalImage.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Resize controls
+            aspectRatioLock.addEventListener('change', () => {
+                sessionStorage.setItem(ASPECT_RATIO_KEY, aspectRatioLock.checked);
+                if (aspectRatioLock.checked) squareLock.checked = false;
+                updateResizeUI();
+            });
+            squareLock.addEventListener('change', () => {
+                if (squareLock.checked) {
+                    aspectRatioLock.checked = false;
+                    sessionStorage.setItem(ASPECT_RATIO_KEY, false);
+                }
+                updateResizeUI();
+                widthInput.dispatchEvent(new Event('input'));
+            });
+            widthInput.addEventListener('input', () => {
+                if (squareLock.checked) {
+                    heightInput.value = widthInput.value;
+                } else if (aspectRatioLock.checked && originalImage) {
+                    const newWidth = parseInt(widthInput.value, 10);
+                    if (!isNaN(newWidth) && newWidth > 0) heightInput.value = Math.round(newWidth / originalAspectRatio);
+                }
+                expandWidthInput.value = widthInput.value;
+                expandHeightInput.value = heightInput.value;
+                drawImageWithTransformations();
+                updateFileName();
+            });
+            heightInput.addEventListener('input', () => {
+                if (aspectRatioLock.checked && originalImage) {
+                    const newHeight = parseInt(heightInput.value, 10);
+                    if (!isNaN(newHeight) && newHeight > 0) widthInput.value = Math.round(newHeight * originalAspectRatio);
+                }
+                expandWidthInput.value = widthInput.value;
+                expandHeightInput.value = heightInput.value;
+                drawImageWithTransformations();
+                updateFileName();
+            });
+            revertSizeBtn.addEventListener('click', () => {
+                if (originalImage) {
+                    widthInput.value = originalImage.width;
+                    heightInput.value = originalImage.height;
+                    widthInput.dispatchEvent(new Event('input'));
+                }
+            });
+            document.getElementById('width-presets').addEventListener('click', (e) => {
+                if (e.target.matches('button')) {
+                    widthInput.value = e.target.dataset.size;
+                    widthInput.dispatchEvent(new Event('input'));
+                }
+            });
+            document.getElementById('height-presets').addEventListener('click', (e) => {
+                if (e.target.matches('button')) {
+                    heightInput.value = e.target.dataset.size;
+                    heightInput.dispatchEvent(new Event('input'));
+                }
+            });
+
+            // AI Button Listeners
+            altTextBtn.addEventListener('click', async () => {
+                if (!currentImageDataUrl) return;
+                toggleAILoader(altTextBtn, true);
+                const base64Data = currentImageDataUrl.split(',')[1];
+                const result = await callGeminiAPI("Generate a concise and descriptive alt text for this image.", base64Data);
+                if (result) {
+                    aiResultTextarea.value = result;
+                    aiResultTextarea.classList.remove('hidden');
+                }
+                toggleAILoader(altTextBtn, false);
+            });
+            captionBtn.addEventListener('click', async () => {
+                if (!currentImageDataUrl) return;
+                toggleAILoader(captionBtn, true);
+                const base64Data = currentImageDataUrl.split(',')[1];
+                const result = await callGeminiAPI("Generate a creative and engaging social media caption for this image. Include a couple of relevant hashtags.", base64Data);
+                if (result) {
+                    aiResultTextarea.value = result;
+                    aiResultTextarea.classList.remove('hidden');
+                }
+                toggleAILoader(captionBtn, false);
+            });
+
+            // Effects & Expand listeners
+            [filterSelect, expandColorSelect, expandPositionSelect].forEach(el => el.addEventListener('change', drawImageWithTransformations));
+            expandDirection.addEventListener('change', () => {
+                expandWidthInput.value = widthInput.value;
+                expandHeightInput.value = heightInput.value;
+                updateExpandCanvasUI();
+            });
+            expandWidthInput.addEventListener('input', () => { updateFileName(); drawFinalPreview(); });
+            expandHeightInput.addEventListener('input', () => { updateFileName(); drawFinalPreview(); });
+            revertCanvasSizeBtn.addEventListener('click', () => {
+                expandWidthInput.value = widthInput.value;
+                expandHeightInput.value = heightInput.value;
+                expandWidthInput.dispatchEvent(new Event('input'));
+            });
+            fileNameInput.addEventListener('input', () => fileNameLock.checked = true);
+            rotateLeftBtn.addEventListener('click', () => { rotation = (rotation - 90 + 360) % 360; drawImageWithTransformations(); });
+            rotateRightBtn.addEventListener('click', () => { rotation = (rotation + 90) % 360; drawImageWithTransformations(); });
+            flipHBtn.addEventListener('click', () => { flipH = !flipH; drawImageWithTransformations(); });
+            flipVBtn.addEventListener('click', () => { flipV = !flipV; drawImageWithTransformations(); });
+
+            // Final Download Action
+            downloadBtn.addEventListener('click', () => {
+                if (!originalImage) {
+                    showMessage('Please upload an image first.');
+                    return;
+                }
+                const width = parseInt(expandWidthInput.value, 10);
+                const height = parseInt(expandHeightInput.value, 10);
+                if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
+                    showMessage('Please enter valid positive canvas width and height values.');
+                    return;
+                }
+
+                const format = formatSelect.value;
+                const quality = parseInt(jpegQualityInput.value, 10) / 100;
+                const dataUrl = previewCanvas.toDataURL(format, quality);
+                const fileExtension = format.split('/')[1];
+                const finalFileName = fileNameInput.value || `${originalFileName}-edited-${width}x${height}`;
+
+                downloadLink.href = dataUrl;
+                downloadLink.download = `${finalFileName}.${fileExtension}`;
+                downloadLink.click();
+            });
+        });
+    </script>
+</body>
+
+</html>
